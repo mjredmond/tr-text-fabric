@@ -1,0 +1,242 @@
+# =============================================================================
+# TR Text-Fabric Dataset Pipeline Configuration
+# =============================================================================
+# This file contains all configurable parameters for the pipeline.
+# Modify paths and settings here rather than in individual scripts.
+# =============================================================================
+
+project:
+  name: "Textus Receptus Text-Fabric Dataset"
+  version: "0.1.0"
+  description: "Full syntactic TF dataset for TR via graft-and-patch from N1904"
+
+# -----------------------------------------------------------------------------
+# Directory Paths
+# -----------------------------------------------------------------------------
+paths:
+  # Use "." for current directory - scripts resolve paths relative to project root
+  root: "."
+  scripts: "${paths.root}/scripts"
+  data:
+    root: "${paths.root}/data"
+    source: "${paths.root}/data/source"
+    intermediate: "${paths.root}/data/intermediate"
+    output: "${paths.root}/data/output"
+  logs: "${paths.root}/logs"
+  reports: "${paths.root}/reports"
+
+# -----------------------------------------------------------------------------
+# Data Sources
+# -----------------------------------------------------------------------------
+sources:
+  # N1904 (Patriarchal Text) - the schema master and syntax donor
+  n1904:
+    # Text-Fabric dataset identifier (loaded via tf.app.use)
+    # Moved from ETCBC/N1904 to CenterBLC/N1904 in 2024
+    tf_dataset: "CenterBLC/N1904"
+    # Alternative: local path if you have a local copy
+    # local_path: "/path/to/n1904/tf"
+
+  # Textus Receptus source
+  tr:
+    # Source type: "robinson-pierpont" or "scrivener"
+    edition: "robinson-pierpont"
+    version: "2018"
+    # URL to download if not present (set to null to disable auto-download)
+    download_url: "https://github.com/byztxt/byzantine-majority-text/archive/refs/heads/master.zip"
+    # Expected filename after download/extraction (use no-variants for clean text)
+    source_file: "csv-unicode/ccat/no-variants"
+    # Alternative: manual path if already downloaded
+    # local_path: "/path/to/tr/data.csv"
+
+# -----------------------------------------------------------------------------
+# Alignment Settings
+# -----------------------------------------------------------------------------
+alignment:
+  # Matching criteria for word alignment
+  # Using surface word form since TR data lacks morphology
+  match_criteria:
+    - "word"            # Surface word form (primary match criterion)
+
+  # Similarity threshold for fuzzy matching (0.0-1.0)
+  # 1.0 = exact match only, lower values allow more flexibility
+  similarity_threshold: 0.95
+
+  # Book to use for proof-of-concept testing
+  poc_book: "3John"  # Shortest NT book, minimal variants
+
+# -----------------------------------------------------------------------------
+# NLP Settings (Stanza)
+# -----------------------------------------------------------------------------
+nlp:
+  # Stanza language code for Ancient Greek
+  language: "grc"
+
+  # Processors to use
+  processors:
+    - "tokenize"
+    - "pos"
+    - "lemma"
+    - "depparse"
+
+  # Model package (default or specific version)
+  package: "default"
+
+  # Use GPU if available
+  use_gpu: false
+
+# -----------------------------------------------------------------------------
+# Label Mapping (UD -> N1904)
+# -----------------------------------------------------------------------------
+label_mapping:
+  # Universal Dependencies to N1904/Lowfat label mapping
+  # This is a starting point; will be refined in Phase 3
+  deprel:
+    nsubj: "Subject"
+    nsubj:pass: "Subject"
+    obj: "Object"
+    iobj: "IndirectObject"
+    obl: "Adjunct"
+    advmod: "Adverb"
+    amod: "Adjective"
+    nmod: "Modifier"
+    appos: "Apposition"
+    conj: "Conjunct"
+    cc: "Conjunction"
+    det: "Determiner"
+    case: "CaseMarker"
+    mark: "Subordinator"
+    cop: "Copula"
+    aux: "Auxiliary"
+    vocative: "Vocative"
+    root: "Predicate"
+
+# -----------------------------------------------------------------------------
+# High-Profile Variants for Manual Review
+# -----------------------------------------------------------------------------
+variants:
+  priority_verses:
+    - book: "1John"
+      chapter: 5
+      verses: [7, 8]
+      name: "Comma Johanneum"
+
+    - book: "Acts"
+      chapter: 8
+      verses: [37]
+      name: "Ethiopian Eunuch's Confession"
+
+    - book: "1Timothy"
+      chapter: 3
+      verses: [16]
+      name: "God/Who Variant"
+
+    - book: "Mark"
+      chapter: 16
+      verses: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+      name: "Longer Ending of Mark"
+
+    - book: "John"
+      chapter: 7
+      verses: [53]
+      name: "Pericope Adulterae Start"
+
+    - book: "John"
+      chapter: 8
+      verses: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+      name: "Pericope Adulterae"
+
+    - book: "Revelation"
+      chapter: 22
+      verses: [19]
+      name: "Book/Tree of Life"
+
+# -----------------------------------------------------------------------------
+# Text-Fabric Output Settings
+# -----------------------------------------------------------------------------
+tf_output:
+  # Dataset name for the output
+  dataset_name: "TR"
+
+  # Version string
+  version: "1.0"
+
+  # Language code
+  language: "grc"
+
+  # Features to generate (must match N1904 for compatibility)
+  word_features:
+    - "word"      # Surface form
+    - "lemma"     # Dictionary form
+    - "sp"        # Part of speech
+    - "gn"        # Gender
+    - "nu"        # Number
+    - "ps"        # Person
+    - "case"      # Grammatical case
+    - "tense"     # Verb tense
+    - "voice"     # Verb voice
+    - "mood"      # Verb mood
+    - "gloss"     # English gloss (if available)
+
+  syntax_features:
+    - "function"  # Syntactic function
+    - "role"      # Semantic role
+    - "type"      # Clause/phrase type
+
+  edge_features:
+    - "parent"    # Parent node in syntax tree
+
+  # OTypes hierarchy (order matters: outermost to innermost)
+  otypes:
+    - "book"
+    - "chapter"
+    - "verse"
+    - "sentence"
+    - "clause"
+    - "phrase"
+    - "word"
+
+# -----------------------------------------------------------------------------
+# Logging Settings
+# -----------------------------------------------------------------------------
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+
+  # Log format
+  format: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+
+  # Date format
+  date_format: "%Y-%m-%d %H:%M:%S"
+
+  # Also log to console
+  console: true
+
+  # Separate log file per script run
+  per_script: true
+
+# -----------------------------------------------------------------------------
+# Quality Assurance Thresholds
+# -----------------------------------------------------------------------------
+qa:
+  # Minimum alignment percentage to consider Phase 2 successful
+  min_alignment_percent: 95.0
+
+  # Maximum allowed deviation from N1904 statistics
+  max_stat_deviation_percent: 15.0
+
+  # Require all priority variants to be manually reviewed
+  require_variant_review: true
+
+# -----------------------------------------------------------------------------
+# Execution Settings
+# -----------------------------------------------------------------------------
+execution:
+  # Stop pipeline on first error
+  fail_fast: true
+
+  # Create backup of intermediate files before overwriting
+  backup_intermediates: false
+
+  # Checkpoint frequency (save state every N records)
+  checkpoint_frequency: 10000

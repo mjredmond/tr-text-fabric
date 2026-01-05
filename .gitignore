@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+ENV/
+
+# Data files (large, can be regenerated)
+data/intermediate/
+data/output/
+data/pipeline_status.json
+logs/
+
+# Keep source data tracked (or exclude if too large)
+# data/source/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code
+.claude/
+
+# Planning docs (optional - remove if you want to share)
+# .planning/

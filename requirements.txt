@@ -1,0 +1,36 @@
+# =============================================================================
+# TR Text-Fabric Dataset Pipeline - Python Dependencies
+# =============================================================================
+# Install with: pip install -r requirements.txt
+# =============================================================================
+
+# Core data processing
+pandas>=2.0.0
+pyarrow>=14.0.0         # Parquet file support
+
+# Text-Fabric - Biblical text corpus tool
+text-fabric>=12.0.0
+
+# NLP - Stanford Stanza for Ancient Greek
+stanza>=1.6.0
+
+# YAML configuration
+pyyaml>=6.0
+
+# HTTP requests (for downloading data)
+requests>=2.28.0
+
+# Progress bars
+tqdm>=4.65.0
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Optional: Jupyter for interactive exploration
+# jupyter>=1.0.0
+# ipython>=8.0.0
+
+# Optional: Visualization
+# matplotlib>=3.7.0
+# networkx>=3.0       # For syntax tree visualization
