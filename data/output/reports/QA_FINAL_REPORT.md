@@ -1,6 +1,6 @@
 # TR Text-Fabric Dataset - QA Report
 
-Generated: 2026-01-04 21:45:18
+Generated: 2026-01-05 10:42:01
 
 ## Dataset Summary
 
@@ -8,7 +8,7 @@ Generated: 2026-01-04 21:45:18
 - **Total books:** 27
 - **Total chapters:** 260
 - **Total verses:** 7957
-- **Unique lemmas:** 7,943
+- **Unique lemmas:** 7,939
 
 ## Syntax Source
 
@@ -34,7 +34,7 @@ Generated: 2026-01-04 21:45:18
 | sp | 140,726 | 100.0% |
 | function | 57,875 | 41.1% |
 | case | 80,444 | 57.2% |
-| gloss | 124,961 | 88.8% |
+| gloss | 140,726 | 100.0% |
 
 ## QA Checks Performed
 

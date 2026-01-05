@@ -39,15 +39,11 @@ sources:
 
   # Textus Receptus source
   tr:
-    # Source type: "robinson-pierpont" or "scrivener"
-    edition: "robinson-pierpont"
-    version: "2018"
-    # URL to download if not present (set to null to disable auto-download)
-    download_url: "https://github.com/byztxt/byzantine-majority-text/archive/refs/heads/master.zip"
-    # Expected filename after download/extraction (use no-variants for clean text)
-    source_file: "csv-unicode/ccat/no-variants"
-    # Alternative: manual path if already downloaded
-    # local_path: "/path/to/tr/data.csv"
+    # Stephanus 1550 Textus Receptus from Blue Letter Bible
+    edition: "stephanus-1550"
+    source: "blueletterbible.org"
+    # HTML pages are cached in data/source/blb_cache/
+    # Use --fresh flag to bypass cache and re-download
 
 # -----------------------------------------------------------------------------
 # Alignment Settings

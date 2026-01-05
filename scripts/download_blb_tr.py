@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
 """
 Download the complete Stephanus 1550 Textus Receptus from Blue Letter Bible.
-Outputs in the same format as tr_raw.csv: chapter,verse,text,book
+Output: data/source/tr_blb.csv (columns: chapter, verse, text, book)
+
+Caching:
+    HTML pages are cached in data/source/blb_cache/
+    Use --fresh to ignore cache and re-download everything
+    Use --clear-cache to delete the cache directory
+
+This script is called by Phase 1 Step 4 (p1_04_acquire_tr.py).
 """
 
+import argparse
+import hashlib
 import requests
 import re
 import csv
@@ -52,15 +61,50 @@ NT_BOOKS = [
 ]
 
 
-def fetch_chapter(blb_book: str, chapter: int) -> str:
-    """Fetch a chapter page from BLB."""
+def get_cache_dir() -> Path:
+    """Get the cache directory path."""
+    config = load_config()
+    source_dir = Path(config["paths"]["data"]["source"])
+    return source_dir / "blb_cache"
+
+
+def get_cache_path(blb_book: str, chapter: int) -> Path:
+    """Get the cache file path for a chapter."""
+    cache_dir = get_cache_dir()
+    return cache_dir / f"{blb_book}_{chapter:03d}.html"
+
+
+def fetch_chapter(blb_book: str, chapter: int, use_cache: bool = True) -> str:
+    """Fetch a chapter page from BLB, using cache if available.
+
+    Args:
+        blb_book: BLB book abbreviation (e.g., "mat", "act")
+        chapter: Chapter number
+        use_cache: If True, use cached HTML if available
+
+    Returns:
+        HTML content of the chapter page
+    """
+    cache_path = get_cache_path(blb_book, chapter)
+
+    # Check cache first
+    if use_cache and cache_path.exists():
+        return cache_path.read_text(encoding="utf-8")
+
+    # Fetch from BLB
     url = f"https://www.blueletterbible.org/tr/{blb_book}/{chapter}/1/"
     headers = {
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
     }
     response = requests.get(url, headers=headers, timeout=30)
     response.raise_for_status()
-    return response.text
+    html = response.text
+
+    # Save to cache
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.write_text(html, encoding="utf-8")
+
+    return html
 
 
 def extract_verses(html: str, book_code: str, chapter: int) -> list:
@@ -119,8 +163,12 @@ def extract_verses(html: str, book_code: str, chapter: int) -> list:
     return verses
 
 
-def download_all():
-    """Download all NT books from BLB."""
+def download_all(use_cache: bool = True):
+    """Download all NT books from BLB.
+
+    Args:
+        use_cache: If True, use cached HTML pages when available
+    """
     config = load_config()
     source_dir = Path(config["paths"]["data"]["source"])
     output_path = source_dir / "tr_blb.csv"
@@ -128,6 +176,8 @@ def download_all():
 
     total_chapters = sum(c[2] for c in NT_BOOKS)
     completed_chapters = 0
+    cached_chapters = 0
+    fetched_chapters = 0
 
     for blb_book, book_code, num_chapters in NT_BOOKS:
         print(f"\n{book_code}:")
@@ -136,20 +186,30 @@ def download_all():
         for chapter in range(1, num_chapters + 1):
             completed_chapters += 1
             progress = completed_chapters / total_chapters * 100
-            print(f"  Ch {chapter:2d}/{num_chapters} ({progress:5.1f}% total)", end="\r")
+
+            # Check if cached
+            cache_path = get_cache_path(blb_book, chapter)
+            is_cached = use_cache and cache_path.exists()
+            status = "[cache]" if is_cached else "[fetch]"
+
+            print(f"  Ch {chapter:2d}/{num_chapters} {status} ({progress:5.1f}% total)", end="\r")
 
             try:
-                html = fetch_chapter(blb_book, chapter)
+                html = fetch_chapter(blb_book, chapter, use_cache=use_cache)
                 verses = extract_verses(html, book_code, chapter)
+
+                if is_cached:
+                    cached_chapters += 1
+                else:
+                    fetched_chapters += 1
+                    # Be nice to the server (only when actually fetching)
+                    time.sleep(0.3)
 
                 if not verses:
                     print(f"\n  WARNING: No verses found for {book_code} {chapter}")
                 else:
                     book_verses.extend(verses)
                     all_verses.extend(verses)
-
-                # Be nice to the server
-                time.sleep(0.3)
 
             except Exception as e:
                 print(f"\n  ERROR: {book_code} {chapter}: {e}")
@@ -163,8 +223,19 @@ def download_all():
         writer.writeheader()
         writer.writerows(all_verses)
 
-    print("Done!")
+    print(f"\nDone! (cached: {cached_chapters}, fetched: {fetched_chapters})")
     return output_path
+
+
+def clear_cache():
+    """Delete all cached HTML files."""
+    import shutil
+    cache_dir = get_cache_dir()
+    if cache_dir.exists():
+        shutil.rmtree(cache_dir)
+        print(f"Deleted cache: {cache_dir}")
+    else:
+        print(f"Cache directory doesn't exist: {cache_dir}")
 
 
 def test_single_chapter(html_file: str = None):
@@ -198,9 +269,32 @@ def test_single_chapter(html_file: str = None):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "--test":
-        # Optional: pass HTML file path as second argument
-        html_file = sys.argv[2] if len(sys.argv) > 2 else None
-        test_single_chapter(html_file)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--fresh", action="store_true",
+        help="Ignore cache and re-download everything from BLB"
+    )
+    parser.add_argument(
+        "--clear-cache", action="store_true",
+        help="Delete the cache directory and exit"
+    )
+    parser.add_argument(
+        "--test", action="store_true",
+        help="Test extraction on Acts 8"
+    )
+    parser.add_argument(
+        "--test-file",
+        help="Path to saved HTML file for testing (use with --test)"
+    )
+    args = parser.parse_args()
+
+    if args.clear_cache:
+        clear_cache()
+    elif args.test:
+        test_single_chapter(args.test_file)
     else:
-        download_all()
+        use_cache = not args.fresh
+        download_all(use_cache=use_cache)

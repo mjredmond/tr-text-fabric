@@ -4,7 +4,7 @@ Script: p1_05_build_tr_dataframe.py
 Phase: 1 - Reconnaissance
 Purpose: Load TR source into standardized DataFrame with unique word IDs
 
-Input:  data/source/tr_raw.csv
+Input:  data/source/tr_blb.csv
 Output: data/intermediate/tr_words.parquet
 
 Usage:
@@ -224,7 +224,7 @@ def main(config: dict = None, dry_run: bool = False) -> bool:
 
     logger = get_logger(__name__)
 
-    input_path = Path(config["paths"]["data"]["source"]) / "tr_raw.csv"
+    input_path = Path(config["paths"]["data"]["source"]) / "tr_blb.csv"
     output_path = Path(config["paths"]["data"]["intermediate"]) / "tr_words.parquet"
 
     if dry_run:

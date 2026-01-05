@@ -82,11 +82,15 @@ python run_pipeline.py --dry-run    # Preview without executing
 
 ### Downloading Fresh TR Data
 
-To re-download the TR from Blue Letter Bible:
+To download the TR from Blue Letter Bible (with caching):
 
 ```bash
-python scripts/download_blb_tr.py
+python scripts/download_blb_tr.py          # Uses cache if available
+python scripts/download_blb_tr.py --fresh  # Ignore cache, re-download everything
+python scripts/download_blb_tr.py --clear-cache  # Delete cached HTML files
 ```
+
+HTML pages are cached in `data/source/blb_cache/` to avoid re-scraping on subsequent runs.
 
 ### Validating Against N1904
 
@@ -150,7 +154,24 @@ The final Text-Fabric dataset is generated in `data/output/tf/` with features in
 | sp | Part of speech | 100% |
 | function | Syntactic function | 41% |
 | case | Grammatical case | 57% |
-| gloss | English gloss | 89% |
+| gloss | English gloss | 100% |
+
+### Gloss Coverage
+
+100% gloss coverage is achieved automatically as part of Phase 4:
+
+```bash
+# Just run the pipeline - glosses are filled automatically
+python run_pipeline.py
+```
+
+| Source | Coverage |
+|--------|----------|
+| N1904 aligned | 88.8% |
+| N1904 + lexicon lookup | 97.9% |
+| Manual glosses + fallbacks | 100% |
+
+See [docs/GLOSS_COVERAGE.md](docs/GLOSS_COVERAGE.md) for details.
 
 ## License
 
