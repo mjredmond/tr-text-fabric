@@ -207,7 +207,7 @@ def load_and_process_tr(input_path: Path, config: dict) -> "pd.DataFrame":
     output_cols = ["word_id", "book", "chapter", "verse", "word_rank", "word"]
 
     # Add optional columns if present
-    optional_cols = ["lemma", "morph", "sp", "tense", "voice", "mood", "case", "number", "gender", "person"]
+    optional_cols = ["lemma", "morph", "strong", "sp", "tense", "voice", "mood", "case", "number", "gender", "person"]
     for col in optional_cols:
         if col in df.columns:
             output_cols.append(col)

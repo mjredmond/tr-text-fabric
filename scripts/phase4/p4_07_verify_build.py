@@ -26,11 +26,12 @@ def verify_file_structure(tf_dir: Path) -> bool:
     """Verify all expected TF files exist."""
     logger = get_logger(__name__)
 
+    # Feature names now match N1904 convention
     required_files = [
         "otext.tf",
         "otype.tf",
         "oslots.tf",
-        "word.tf",
+        "unicode.tf",   # N1904-compatible name for word text
         "lemma.tf",
     ]
 
@@ -38,15 +39,20 @@ def verify_file_structure(tf_dir: Path) -> bool:
         "sp.tf",
         "function.tf",
         "case.tf",
-        "gn.tf",
-        "nu.tf",
-        "ps.tf",
+        "gender.tf",    # N1904-compatible name (was gn)
+        "number.tf",    # N1904-compatible name (was nu)
+        "person.tf",    # N1904-compatible name (was ps)
         "tense.tf",
         "voice.tf",
         "mood.tf",
         "gloss.tf",
         "source.tf",
         "parent.tf",
+        "strong.tf",
+        "morph.tf",
+        "book.tf",
+        "chapter.tf",
+        "verse.tf",
     ]
 
     all_ok = True

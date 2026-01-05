@@ -5,6 +5,6 @@
 @description=Textus Receptus with syntax transplanted from N1904
 @source=TR via graft-and-patch from N1904
 
-@fmt:text-orig-full={word} 
+@fmt:text-orig-full={unicode} 
 @sectionTypes=book,chapter,verse
-@sectionFeatures=book@book,chapter@chapter,verse@verse
+@sectionFeatures=book,chapter,verse

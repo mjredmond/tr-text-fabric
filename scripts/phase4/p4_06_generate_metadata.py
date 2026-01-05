@@ -42,9 +42,10 @@ def write_otext(output_path: Path, config: dict):
         f.write("@description=Textus Receptus with syntax transplanted from N1904\n")
         f.write("@source=TR via graft-and-patch from N1904\n")
         f.write("\n")
-        f.write("@fmt:text-orig-full={word} \n")
+        # N1904-compatible configuration
+        f.write("@fmt:text-orig-full={unicode} \n")
         f.write("@sectionTypes=book,chapter,verse\n")
-        f.write("@sectionFeatures=book@book,chapter@chapter,verse@verse\n")
+        f.write("@sectionFeatures=book,chapter,verse\n")
 
     logger.info(f"Wrote otext.tf to {output_path}")
 

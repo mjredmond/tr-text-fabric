@@ -331,11 +331,11 @@
         "name": "otype",
         "values": [],
         "sample_values": [
-          "clause",
-          "phrase",
-          "verse",
+          "wg",
           "word",
-          "subphrase"
+          "sentence",
+          "clause",
+          "verse"
         ]
       }
     ],
@@ -528,11 +528,11 @@
         "name": "otype",
         "values": [],
         "sample_values": [
-          "clause",
-          "phrase",
-          "verse",
+          "wg",
           "word",
-          "subphrase"
+          "sentence",
+          "clause",
+          "verse"
         ]
       }
     ],
@@ -725,11 +725,11 @@
         "name": "otype",
         "values": [],
         "sample_values": [
-          "clause",
-          "phrase",
-          "verse",
+          "wg",
           "word",
-          "subphrase"
+          "sentence",
+          "clause",
+          "verse"
         ]
       },
       {
@@ -1304,11 +1304,11 @@
         "name": "otype",
         "values": [],
         "sample_values": [
-          "clause",
-          "phrase",
-          "verse",
+          "wg",
           "word",
-          "subphrase"
+          "sentence",
+          "clause",
+          "verse"
         ]
       },
       {
@@ -1945,11 +1945,11 @@
         "name": "otype",
         "values": [],
         "sample_values": [
-          "clause",
-          "phrase",
-          "verse",
+          "wg",
           "word",
-          "subphrase"
+          "sentence",
+          "clause",
+          "verse"
         ]
       },
       {
@@ -2731,11 +2731,11 @@
         "name": "otype",
         "values": [],
         "sample_values": [
-          "clause",
-          "phrase",
-          "verse",
+          "wg",
           "word",
-          "subphrase"
+          "sentence",
+          "clause",
+          "verse"
         ]
       },
       {
@@ -3523,11 +3523,11 @@
         "name": "otype",
         "values": [],
         "sample_values": [
-          "clause",
-          "phrase",
-          "verse",
+          "wg",
           "word",
-          "subphrase"
+          "sentence",
+          "clause",
+          "verse"
         ]
       },
       {
@@ -5407,11 +5407,11 @@
         "name": "otype",
         "values": [],
         "sample_values": [
-          "clause",
-          "phrase",
-          "verse",
+          "wg",
           "word",
-          "subphrase"
+          "sentence",
+          "clause",
+          "verse"
         ]
       },
       {
@@ -7872,11 +7872,11 @@
         "name": "otype",
         "values": [],
         "sample_values": [
-          "clause",
-          "phrase",
-          "verse",
+          "wg",
           "word",
-          "subphrase"
+          "sentence",
+          "clause",
+          "verse"
         ]
       },
       {
@@ -10564,11 +10564,11 @@
         "name": "otype",
         "values": [],
         "sample_values": [
-          "clause",
-          "phrase",
-          "verse",
+          "wg",
           "word",
-          "subphrase"
+          "sentence",
+          "clause",
+          "verse"
         ]
       },
       {

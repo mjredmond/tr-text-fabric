@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
 Download the complete Stephanus 1550 Textus Receptus from Blue Letter Bible.
-Output: data/source/tr_blb.csv (columns: chapter, verse, text, book)
+Output: data/source/tr_blb.csv (columns: book, chapter, verse, word_rank, word, strong)
+
+Each row represents one word with its Strong's number (G-number).
 
 Caching:
     HTML pages are cached in data/source/blb_cache/
@@ -107,10 +109,117 @@ def fetch_chapter(blb_book: str, chapter: int, use_cache: bool = True) -> str:
     return html
 
 
-def extract_verses(html: str, book_code: str, chapter: int) -> list:
-    """Extract verses from BLB HTML page."""
+def build_morph_code(span) -> str:
+    """Build Robinson-style morphology code from BLB data attributes.
+
+    Format examples:
+    - V-PAI-3S (Verb-Present-Active-Indicative-3rd-Singular)
+    - N-NSM (Noun-Nominative-Singular-Masculine)
+    - A-ASF (Adjective-Accusative-Singular-Feminine)
+    """
+    speech = span.get("data-speech", "")
+    tense = span.get("data-tense", "")
+    voice = span.get("data-voice", "")
+    mood = span.get("data-mood", "")
+    person = span.get("data-person", "")
+    number = span.get("data-number", "")
+    case = span.get("data-case", "")
+    gender = span.get("data-gender", "")
+
+    # Part of speech mapping
+    pos_map = {
+        "Verb": "V", "Noun": "N", "Adjective": "A", "Adverb": "ADV",
+        "Conjunction": "CONJ", "Preposition": "PREP", "Definite article": "T",
+        "Personal / Possessive Pronoun": "P", "Demonstrative Pronoun": "D-PRO",
+        "Relative Pronoun": "R-PRO", "Interrogative Pronoun": "I-PRO",
+        "Indefinite Pronoun": "X-PRO", "Particle, Disjunctive Particle": "PRT",
+        "Conditional Particle or Conjunction": "COND", "Interjection": "INJ",
+        "Hebrew transliterated word (indeclinable)": "HEB",
+    }
+
+    # Tense mapping
+    tense_map = {
+        "Present": "P", "Imperfect": "I", "Future": "F", "Aorist": "A",
+        "Second Aorist": "2A", "Perfect": "R", "Second Perfect": "2R",
+        "Pluperfect": "L", "Second Pluperfect": "2L",
+    }
+
+    # Voice mapping
+    voice_map = {
+        "Active": "A", "Middle": "M", "Passive": "P",
+        "Middle or Passive Deponent": "D", "Middle Deponent": "D",
+        "Passive Deponent": "D", "(No voice stated)": "",
+    }
+
+    # Mood mapping
+    mood_map = {
+        "Indicative": "I", "Subjunctive": "S", "Optative": "O",
+        "Imperative": "M", "Infinitive": "N", "Participle": "P",
+    }
+
+    # Case mapping
+    case_map = {
+        "Nominative": "N", "Genitive": "G", "Dative": "D",
+        "Accusative": "A", "Vocative": "V",
+    }
+
+    # Number mapping
+    num_map = {"Singular": "S", "Plural": "P"}
+
+    # Gender mapping
+    gen_map = {"Masculine": "M", "Feminine": "F", "Neuter": "N"}
+
+    # Person mapping
+    person_map = {"1st Person": "1", "2nd Person": "2", "3rd Person": "3"}
+
+    # Get POS code
+    pos = pos_map.get(speech, speech[:3].upper() if speech else "")
+    if not pos:
+        return ""
+
+    parts = [pos]
+
+    # Build code based on POS
+    if pos == "V":
+        # Verb: V-TAV-PN or V-TAN (infinitive) or V-TAP-CNGd (participle)
+        t = tense_map.get(tense, "")
+        v = voice_map.get(voice, "")
+        m = mood_map.get(mood, "")
+
+        if t or v or m:
+            parts.append(f"{t}{v}{m}")
+
+        if mood == "Participle":
+            # Participles have case, number, gender
+            c = case_map.get(case, "")
+            n = num_map.get(number, "")
+            g = gen_map.get(gender, "")
+            if c or n or g:
+                parts.append(f"{c}{n}{g}")
+        elif mood != "Infinitive":
+            # Finite verbs have person and number
+            p = person_map.get(person, "")
+            n = num_map.get(number, "")
+            if p or n:
+                parts.append(f"{p}{n}")
+    else:
+        # Nouns, adjectives, pronouns, articles: POS-CNG
+        c = case_map.get(case, "")
+        n = num_map.get(number, "")
+        g = gen_map.get(gender, "")
+        if c or n or g:
+            parts.append(f"{c}{n}{g}")
+
+    return "-".join(parts) if len(parts) > 1 else parts[0]
+
+
+def extract_words(html: str, book_code: str, chapter: int) -> list:
+    """Extract words with Strong's numbers and morph codes from BLB HTML page.
+
+    Returns list of word records with: book, chapter, verse, word_rank, word, strong, morph
+    """
     soup = BeautifulSoup(html, "html.parser")
-    verses = []
+    words = []
 
     # Find all verse divs - they have class "GkBibleText scriptureText"
     verse_divs = soup.find_all("div", class_="GkBibleText")
@@ -128,9 +237,17 @@ def extract_verses(html: str, book_code: str, chapter: int) -> list:
 
         # Get all word-phrase spans
         word_spans = verse_div.find_all("span", class_="word-phrase")
-        words = []
+        word_rank = 0
 
         for span in word_spans:
+            # Get Strong's number from data-strongs attribute
+            strong = span.get("data-strongs", "")
+            if strong:
+                strong = f"G{strong}"  # Add G prefix
+
+            # Get morphology code
+            morph = build_morph_code(span)
+
             # Get the text content (first text node, before the <sup> tag)
             text = ""
             for content in span.contents:
@@ -148,17 +265,39 @@ def extract_verses(html: str, book_code: str, chapter: int) -> list:
                 text = re.sub(r'\s*G\d+', '', text)
 
             if text:
-                words.append(text)
+                word_rank += 1
+                words.append({
+                    "book": book_code,
+                    "chapter": chapter,
+                    "verse": verse_num,
+                    "word_rank": word_rank,
+                    "word": text,
+                    "strong": strong,
+                    "morph": morph
+                })
 
-        if words:
-            # Join words with spaces
-            verse_text = " ".join(words)
-            verses.append({
-                "chapter": chapter,
-                "verse": verse_num,
-                "text": verse_text,
-                "book": book_code
-            })
+    return words
+
+
+def extract_verses(html: str, book_code: str, chapter: int) -> list:
+    """Extract verses from BLB HTML page (legacy format for compatibility)."""
+    words = extract_words(html, book_code, chapter)
+
+    # Group words back into verses
+    from collections import defaultdict
+    verse_words = defaultdict(list)
+    for w in words:
+        key = (w["chapter"], w["verse"])
+        verse_words[key].append(w["word"])
+
+    verses = []
+    for (ch, v), word_list in sorted(verse_words.items()):
+        verses.append({
+            "chapter": ch,
+            "verse": v,
+            "text": " ".join(word_list),
+            "book": book_code
+        })
 
     return verses
 
@@ -168,11 +307,14 @@ def download_all(use_cache: bool = True):
 
     Args:
         use_cache: If True, use cached HTML pages when available
+
+    Returns:
+        Path to output CSV file (word-level with Strong's numbers)
     """
     config = load_config()
     source_dir = Path(config["paths"]["data"]["source"])
     output_path = source_dir / "tr_blb.csv"
-    all_verses = []
+    all_words = []
 
     total_chapters = sum(c[2] for c in NT_BOOKS)
     completed_chapters = 0
@@ -181,7 +323,7 @@ def download_all(use_cache: bool = True):
 
     for blb_book, book_code, num_chapters in NT_BOOKS:
         print(f"\n{book_code}:")
-        book_verses = []
+        book_words = []
 
         for chapter in range(1, num_chapters + 1):
             completed_chapters += 1
@@ -196,7 +338,7 @@ def download_all(use_cache: bool = True):
 
             try:
                 html = fetch_chapter(blb_book, chapter, use_cache=use_cache)
-                verses = extract_verses(html, book_code, chapter)
+                words = extract_words(html, book_code, chapter)
 
                 if is_cached:
                     cached_chapters += 1
@@ -205,25 +347,32 @@ def download_all(use_cache: bool = True):
                     # Be nice to the server (only when actually fetching)
                     time.sleep(0.3)
 
-                if not verses:
-                    print(f"\n  WARNING: No verses found for {book_code} {chapter}")
+                if not words:
+                    print(f"\n  WARNING: No words found for {book_code} {chapter}")
                 else:
-                    book_verses.extend(verses)
-                    all_verses.extend(verses)
+                    book_words.extend(words)
+                    all_words.extend(words)
 
             except Exception as e:
                 print(f"\n  ERROR: {book_code} {chapter}: {e}")
 
-        print(f"  {book_code}: {len(book_verses)} verses                    ")
+        # Count verses in book
+        verses_in_book = len(set((w["chapter"], w["verse"]) for w in book_words))
+        print(f"  {book_code}: {len(book_words)} words, {verses_in_book} verses                    ")
 
-    # Write to CSV
-    print(f"\nWriting {len(all_verses)} verses to {output_path}")
+    # Write to CSV (word-level with Strong's and morph)
+    print(f"\nWriting {len(all_words)} words to {output_path}")
     with open(output_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["chapter", "verse", "text", "book"])
+        writer = csv.DictWriter(f, fieldnames=["book", "chapter", "verse", "word_rank", "word", "strong", "morph"])
         writer.writeheader()
-        writer.writerows(all_verses)
+        writer.writerows(all_words)
 
+    # Summary
+    words_with_strong = sum(1 for w in all_words if w["strong"])
+    words_with_morph = sum(1 for w in all_words if w.get("morph"))
     print(f"\nDone! (cached: {cached_chapters}, fetched: {fetched_chapters})")
+    print(f"Words with Strong's numbers: {words_with_strong:,} / {len(all_words):,} ({words_with_strong/len(all_words)*100:.1f}%)")
+    print(f"Words with morph codes: {words_with_morph:,} / {len(all_words):,} ({words_with_morph/len(all_words)*100:.1f}%)")
     return output_path
 
 

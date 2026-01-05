@@ -45,18 +45,34 @@ def build_tf_data(complete_df, containers_df, config: dict) -> tuple:
     # Node features dictionary: feature_name -> {node_id: value}
     node_features = {}
 
-    # Word features
-    word_feature_names = ["word", "lemma", "sp", "function", "case", "gn", "nu",
-                          "ps", "tense", "voice", "mood", "gloss", "source"]
+    # Word features - map internal names to N1904-compatible output names
+    # Format: (output_name, input_column_name)
+    word_feature_map = [
+        ("unicode", "word"),      # N1904 uses 'unicode' for word text
+        ("lemma", "lemma"),
+        ("strong", "strong"),
+        ("morph", "morph"),
+        ("sp", "sp"),
+        ("function", "function"),
+        ("case", "case"),
+        ("gender", "gn"),         # N1904 uses 'gender' not 'gn'
+        ("number", "nu"),         # N1904 uses 'number' not 'nu'
+        ("person", "ps"),         # N1904 uses 'person' not 'ps'
+        ("tense", "tense"),
+        ("voice", "voice"),
+        ("mood", "mood"),
+        ("gloss", "gloss"),
+        ("source", "source"),
+    ]
 
-    for feat in word_feature_names:
-        if feat in complete_df.columns:
-            node_features[feat] = {}
+    for output_name, input_col in word_feature_map:
+        if input_col in complete_df.columns:
+            node_features[output_name] = {}
             for _, row in complete_df.iterrows():
                 slot = slot_map[row["word_id"]]
-                val = row.get(feat)
+                val = row.get(input_col)
                 if val is not None and str(val) != "nan" and val != "":
-                    node_features[feat][slot] = str(val)
+                    node_features[output_name][slot] = str(val)
 
     logger.info(f"Built {len(node_features)} word features")
 
@@ -82,35 +98,32 @@ def build_tf_data(complete_df, containers_df, config: dict) -> tuple:
             last_slot = slot_map.get(container["last_slot"], container["last_slot"])
             oslots[new_id] = set(range(first_slot, last_slot + 1))
 
-    # Add container features (book name, chapter number, verse number)
-    node_features["book@verse"] = {}
-    node_features["chapter@verse"] = {}
-    node_features["verse@verse"] = {}
-    node_features["book@chapter"] = {}
-    node_features["chapter@chapter"] = {}
-    node_features["book@book"] = {}
+    # Add container features to match N1904 structure:
+    # - book: on book nodes only
+    # - chapter: on chapter nodes only
+    # - verse: on verse nodes only
+    node_features["book"] = {}
+    node_features["chapter"] = {}
+    node_features["verse"] = {}
 
     for _, container in containers_df.iterrows():
         new_id = container_node_map[container["node_id"]]
         otype = container["otype"]
 
         if otype == "verse":
-            node_features["book@verse"][new_id] = str(container["book"])
-            node_features["chapter@verse"][new_id] = int(container["chapter"])
-            node_features["verse@verse"][new_id] = int(container["verse"])
+            node_features["verse"][new_id] = int(container["verse"])
         elif otype == "chapter":
-            node_features["book@chapter"][new_id] = str(container["book"])
-            node_features["chapter@chapter"][new_id] = int(container["chapter"])
+            node_features["chapter"][new_id] = int(container["chapter"])
         elif otype == "book":
-            node_features["book@book"][new_id] = str(container["name"])
+            node_features["book"][new_id] = str(container["name"])
 
     logger.info(f"Built oslots for {len(oslots)} containers")
 
-    # Build otext configuration
+    # Build otext configuration (matching N1904 structure)
     otext = {
-        "fmt:text-orig-full": "{word} ",
+        "fmt:text-orig-full": "{unicode} ",
         "sectionTypes": "book,chapter,verse",
-        "sectionFeatures": "book@book,chapter@chapter,verse@verse",
+        "sectionFeatures": "book,chapter,verse",
     }
 
     return node_features, oslots, otext, max_slot
@@ -138,16 +151,18 @@ def write_tf_dataset(node_features, oslots, otext, max_slot, output_dir: Path, c
     }
 
     # Add feature metadata with valueType
+    # Section features (on container nodes)
+    section_features = {
+        "book": ("str", "book name for book nodes"),
+        "chapter": ("int", "chapter number for chapter nodes"),
+        "verse": ("int", "verse number for verse nodes"),
+    }
+
     for feat in node_features:
-        if "@" in feat:
-            base_feat = feat.split("@")[0]
-            # Chapter and verse are integers, book is string
-            if base_feat in ("chapter", "verse"):
-                value_type = "int"
-            else:
-                value_type = "str"
+        if feat in section_features:
+            value_type, desc = section_features[feat]
             metadata[feat] = {
-                "description": f"{base_feat} feature for section nodes",
+                "description": desc,
                 "valueType": value_type
             }
         else:
@@ -190,8 +205,8 @@ def write_tf_dataset(node_features, oslots, otext, max_slot, output_dir: Path, c
         if not feat_data:
             continue
 
-        # Clean feature name for filename
-        file_name = feat_name.replace("@", "_at_") + ".tf"
+        # Feature name is now the filename directly
+        file_name = feat_name + ".tf"
         feat_path = output_dir / file_name
 
         with open(feat_path, "w", encoding="utf-8") as f:
