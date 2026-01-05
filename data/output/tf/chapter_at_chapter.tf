@@ -1,5 +1,6 @@
 @node
 @description=chapter feature for section nodes
+@valueType=int
 
 148684	1
 148685	2

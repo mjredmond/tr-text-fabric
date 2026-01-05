@@ -1,5 +1,6 @@
 @node
 @description=nu word feature
+@valueType=str
 
 5	s
 8	s

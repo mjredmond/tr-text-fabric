@@ -1,5 +1,6 @@
 @node
 @description=lemma word feature
+@valueType=str
 
 1	Παῦλος
 2	κλητός

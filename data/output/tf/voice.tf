@@ -1,5 +1,6 @@
 @node
 @description=voice word feature
+@valueType=str
 
 18	active
 21	passive

@@ -1,5 +1,6 @@
 @node
 @description=book feature for section nodes
+@valueType=str
 
 148684	1CO
 148685	1CO

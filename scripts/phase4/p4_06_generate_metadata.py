@@ -80,6 +80,7 @@ def write_otype(output_path: Path, complete_df, containers_df):
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("@node\n")
         f.write("@description=node type assignment\n")
+        f.write("@valueType=str\n")
         f.write("\n")
 
         # Write slot otypes (all words)

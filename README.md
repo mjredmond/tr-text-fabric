@@ -117,6 +117,8 @@ python scripts/compare_tr_n1904.py
 
 ### Phase 4: Text-Fabric Generation
 - Merge aligned and NLP-parsed data
+- Fill glosses to achieve 100% coverage
+- Fix systematic NLP errors (lemma/POS corrections using N1904 reference)
 - Generate TF node features (word, lemma, pos, case, etc.)
 - Generate TF edge features (parent relationships)
 - Build container nodes (book, chapter, verse)
@@ -172,6 +174,24 @@ python run_pipeline.py
 | Manual glosses + fallbacks | 100% |
 
 See [docs/GLOSS_COVERAGE.md](docs/GLOSS_COVERAGE.md) for details.
+
+## Using the Dataset
+
+Load the dataset with Text-Fabric:
+
+```python
+from tf.fabric import Fabric
+
+TF = Fabric(locations='data/output/tf')
+api = TF.load('word lemma sp case gn nu ps tense voice mood function gloss source')
+
+# Get John 3:16
+for v in api.F.otype.s('verse'):
+    if api.F.book_at_verse.v(v) == 'JHN' and api.F.chapter_at_verse.v(v) == 3 and api.F.verse_at_verse.v(v) == 16:
+        words = api.L.d(v, otype='word')
+        for w in words:
+            print(api.F.word.v(w), api.F.lemma.v(w), api.F.sp.v(w))
+```
 
 ## License
 

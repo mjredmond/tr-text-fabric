@@ -1,5 +1,6 @@
 @node
 @description=sp word feature
+@valueType=str
 
 1	subs
 2	adjv

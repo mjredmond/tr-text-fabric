@@ -1,5 +1,6 @@
 @node
 @description=gloss word feature
+@valueType=str
 
 1	Paul
 2	called, summoned, invited

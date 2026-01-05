@@ -1,5 +1,6 @@
 @node
 @description=case word feature
+@valueType=str
 
 1	nominative
 2	nominative

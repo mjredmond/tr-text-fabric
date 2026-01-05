@@ -1,5 +1,6 @@
 @node
 @description=function word feature
+@valueType=str
 
 5	Predicate
 8	Predicate

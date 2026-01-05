@@ -1,5 +1,6 @@
 @edge
 @description=parent (head) word in dependency tree
+@valueType=int
 
 51	50
 60	59

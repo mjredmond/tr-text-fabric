@@ -1,5 +1,6 @@
 @node
 @description=verse feature for section nodes
+@valueType=int
 
 140727	1
 140728	2

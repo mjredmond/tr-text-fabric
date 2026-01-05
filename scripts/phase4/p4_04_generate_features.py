@@ -137,13 +137,24 @@ def write_tf_dataset(node_features, oslots, otext, max_slot, output_dir: Path, c
         "otext": otext,
     }
 
-    # Add feature metadata
+    # Add feature metadata with valueType
     for feat in node_features:
         if "@" in feat:
             base_feat = feat.split("@")[0]
-            metadata[feat] = {"description": f"{base_feat} feature for section nodes"}
+            # Chapter and verse are integers, book is string
+            if base_feat in ("chapter", "verse"):
+                value_type = "int"
+            else:
+                value_type = "str"
+            metadata[feat] = {
+                "description": f"{base_feat} feature for section nodes",
+                "valueType": value_type
+            }
         else:
-            metadata[feat] = {"description": f"{feat} word feature"}
+            metadata[feat] = {
+                "description": f"{feat} word feature",
+                "valueType": "str"
+            }
 
     # Use TF's walker to create the dataset
     TF = Fabric(locations=str(output_dir), silent="deep")
@@ -206,6 +217,7 @@ def write_tf_dataset(node_features, oslots, otext, max_slot, output_dir: Path, c
     with open(oslots_path, "w", encoding="utf-8") as f:
         f.write("@edge\n")
         f.write("@description=slot containment for non-slot nodes\n")
+        f.write("@valueType=str\n")
         f.write("\n")
 
         for node in sorted(oslots.keys()):

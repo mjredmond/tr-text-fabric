@@ -1,5 +1,6 @@
 @node
 @description=node type assignment
+@valueType=str
 
 1	word
 2	word

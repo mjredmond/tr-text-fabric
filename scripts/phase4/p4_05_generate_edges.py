@@ -85,6 +85,7 @@ def write_edge_file(edges: dict, output_path: Path):
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("@edge\n")
         f.write("@description=parent (head) word in dependency tree\n")
+        f.write("@valueType=int\n")
         f.write("\n")
 
         # Write edges sorted by child node

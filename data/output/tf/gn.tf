@@ -1,5 +1,6 @@
 @node
 @description=gn word feature
+@valueType=str
 
 5	m
 8	m

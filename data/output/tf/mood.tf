@@ -1,5 +1,6 @@
 @node
 @description=mood word feature
+@valueType=str
 
 18	participle
 21	participle

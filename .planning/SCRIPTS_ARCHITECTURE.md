@@ -50,6 +50,8 @@
 │   ├── phase4/
 │   │   ├── __init__.py
 │   │   ├── p4_01_merge_data.py
+│   │   ├── p4_01b_fill_glosses.py
+│   │   ├── p4_01c_fix_nlp_errors.py
 │   │   ├── p4_02_generate_containers.py
 │   │   ├── p4_03_configure_otypes.py
 │   │   ├── p4_04_generate_features.py
@@ -163,7 +165,7 @@ Phase 3 (requires Phase 2):
 p2_04 (gaps.csv) → p3_01 → p3_02 → p3_03 → p3_04 → p3_05 → p3_06
 
 Phase 4 (requires Phase 2 + Phase 3):
-p2_06 + p3_05 → p4_01 → p4_02 → p4_03 → p4_04 → p4_05 → p4_06 → p4_07
+p2_06 + p3_05 → p4_01 → p4_01b → p4_01c → p4_02 → p4_03 → p4_04 → p4_05 → p4_06 → p4_07
 
 Phase 5 (requires Phase 4):
 p4_07 → p5_01 → p5_02 → p5_03 → p5_04 → p5_05 → p5_06 → p5_07 → p5_08

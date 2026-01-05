@@ -1,5 +1,6 @@
 @node
 @description=tense word feature
+@valueType=str
 
 18	present
 21	perfect

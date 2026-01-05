@@ -1,5 +1,6 @@
 @node
 @description=source word feature
+@valueType=str
 
 1	n1904
 2	n1904

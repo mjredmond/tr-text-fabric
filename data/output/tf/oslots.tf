@@ -1,5 +1,6 @@
 @edge
 @description=slot containment for non-slot nodes
+@valueType=str
 
 140727	1-12
 140728	13-44

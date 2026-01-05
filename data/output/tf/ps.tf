@@ -1,5 +1,6 @@
 @node
 @description=ps word feature
+@valueType=str
 
 34	2
 54	2
