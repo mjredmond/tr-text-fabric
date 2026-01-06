@@ -2,6 +2,10 @@
 
 A complete Text-Fabric dataset for the Stephanus 1550 Textus Receptus (TR) Greek New Testament, with syntactic annotations transplanted from the N1904 (Nestle 1904) dataset.
 
+## Disclaimer
+
+This dataset is a derivative work, not original academic scholarship. The syntactic annotations are transplanted from the [N1904 dataset](https://github.com/CenterBLC/N1904), which was created by biblical scholars at the Center for Biblical Languages and Computing. The author of this repository is not a biblical scholar. This dataset is provided for convenience and experimentation; please use it with discretion and verify findings against authoritative sources when accuracy matters.
+
 ## Overview
 
 This project creates a syntactically-annotated Text-Fabric dataset for the TR using a "Graft and Patch" strategy:
