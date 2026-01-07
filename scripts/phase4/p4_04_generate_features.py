@@ -79,6 +79,10 @@ def build_tf_data(complete_df, containers_df, config: dict) -> tuple:
         ("ref", "ref"),                   # Reference string (MAT 1:1!1)
         ("id", "id"),                     # Unique word ID
         ("cls", "cls"),                   # Word class (noun/verb/etc)
+        # Lookup-based features from N1904
+        ("trans", "trans"),               # Contextual English translation
+        ("domain", "domain"),             # Semantic domain codes
+        ("typems", "typems"),             # Morphological subtype
     ]
 
     for output_name, input_col in word_feature_map:

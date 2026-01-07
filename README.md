@@ -177,6 +177,9 @@ The final Text-Fabric dataset is generated in `data/output/tf/` with features in
 | num | Word position in verse | 100% |
 | ref | Reference string (MAT 1:1!1) | 100% |
 | id | Unique word ID | 100% |
+| trans | Contextual translation | 97% |
+| domain | Semantic domain codes | 90% |
+| typems | Morphological subtype | 32% |
 
 ### Gloss Coverage
 

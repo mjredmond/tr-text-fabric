@@ -36,9 +36,9 @@ This document tracks progress toward feature parity between the TR Text-Fabric d
 | ref | ✓ | ✓ | Complete |
 | id | ✓ | ✓ | Complete |
 | cls | ✓ | ✓ | Complete |
-| trans | ✓ | ✗ | TODO - Hard |
-| domain | ✓ | ✗ | TODO - Hard |
-| typems | ✓ | ✗ | TODO - Hard |
+| trans | ✓ | ✓ | Complete (97% coverage) |
+| domain | ✓ | ✓ | Complete (90% coverage) |
+| typems | ✓ | ✓ | Complete (32% - applies to nouns/pronouns) |
 
 ### Hierarchical Structure (Node Types)
 
@@ -205,7 +205,7 @@ For clause/phrase/wg nodes:
 
 1. ✅ Phase 1a: translit, lemmatranslit, unaccent, after, ln (DONE)
 2. ✅ Phase 1b: bookshort, text, normalized, trailer, num, ref, id, cls (DONE)
-3. ⬜ Phase 2: trans, domain, typems (lookup-based)
+3. ✅ Phase 2: trans, domain, typems (DONE - lookup-based)
 4. ⬜ Phase 3: Hierarchical structure (Option B or C)
 
 ---
@@ -225,7 +225,7 @@ For clause/phrase/wg nodes:
 - [x] ref - 100%
 - [x] id - 100%
 - [x] cls - 100%
-- [ ] trans
-- [ ] domain
-- [ ] typems
+- [x] trans - 97%
+- [x] domain - 90%
+- [x] typems - 32%
 - [ ] Hierarchical structure
