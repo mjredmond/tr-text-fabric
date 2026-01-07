@@ -299,7 +299,7 @@ def regenerate_structure_features(structure_df: pd.DataFrame, node_map: dict, ou
                     f.write(f"{node_id}\t{value}\n")
 
 
-def main():
+def main(config=None):
     """Main entry point."""
     config = load_config()
 

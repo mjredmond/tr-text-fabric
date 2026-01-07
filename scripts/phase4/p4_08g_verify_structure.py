@@ -167,7 +167,7 @@ def verify_navigation(TF) -> bool:
     return True
 
 
-def main():
+def main(config=None):
     """Main entry point."""
     with ScriptLogger('p4_08g_verify_structure') as logger:
         logger.info("Verifying TR structure integrity...")

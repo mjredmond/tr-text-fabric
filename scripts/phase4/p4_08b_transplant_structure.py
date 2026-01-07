@@ -167,7 +167,7 @@ def transplant_verse_structure(
     return transplanted
 
 
-def main():
+def main(config=None):
     """Main entry point."""
     config = load_config()
 

@@ -638,7 +638,7 @@ def save_structure_summary(clause_nodes: list, phrase_nodes: list,
     df.to_parquet(output_path, index=False)
 
 
-def main():
+def main(config=None):
     """Main entry point."""
     config = load_config()
 

@@ -137,7 +137,7 @@ def extract_unknown_words(tr: pd.DataFrame) -> pd.DataFrame:
     return unknown_forms
 
 
-def main():
+def main(config=None):
     """Main entry point."""
     config = {
         'intermediate_dir': 'data/intermediate',

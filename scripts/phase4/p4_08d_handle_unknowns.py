@@ -383,7 +383,7 @@ def infer_from_morph(morph: str) -> tuple:
     return (None, None, 0)
 
 
-def main():
+def main(config=None):
     """Main entry point."""
     with ScriptLogger('p4_08d_handle_unknowns') as logger:
         # Load data

@@ -196,7 +196,7 @@ def process_infer_verse(
     return result
 
 
-def main():
+def main(config=None):
     """Main entry point."""
     config = load_config()
 
