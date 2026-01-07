@@ -70,6 +70,15 @@ def build_tf_data(complete_df, containers_df, config: dict) -> tuple:
         ("unaccent", "unaccent"),         # Word without diacritics
         ("after", "after"),               # Trailing punctuation/space
         ("ln", "ln"),                     # Louw-Nida semantic domains
+        # Additional N1904-compatible features
+        ("bookshort", "bookshort"),       # Abbreviated book name
+        ("text", "text"),                 # Surface form (alias for unicode)
+        ("normalized", "normalized"),     # Unicode NFC normalized
+        ("trailer", "trailer"),           # Trailing material (alias for after)
+        ("num", "num"),                   # Word position in verse
+        ("ref", "ref"),                   # Reference string (MAT 1:1!1)
+        ("id", "id"),                     # Unique word ID
+        ("cls", "cls"),                   # Word class (noun/verb/etc)
     ]
 
     for output_name, input_col in word_feature_map:

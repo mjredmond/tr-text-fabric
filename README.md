@@ -156,8 +156,11 @@ The final Text-Fabric dataset is generated in `data/output/tf/` with features in
 | Feature | Description | Coverage |
 |---------|-------------|----------|
 | unicode | Surface form (Greek) | 100% |
+| text | Surface form (alias) | 100% |
+| normalized | Unicode NFC normalized | 100% |
 | lemma | Dictionary form | 100% |
 | sp | Part of speech | 100% |
+| cls | Word class (noun/verb/adj) | 100% |
 | strong | Strong's number | 100% |
 | morph | Morphology code | 100% |
 | function | Syntactic function | 41% |
@@ -168,7 +171,12 @@ The final Text-Fabric dataset is generated in `data/output/tf/` with features in
 | lemmatranslit | Lemma transliteration | 100% |
 | unaccent | Greek without diacritics | 100% |
 | after | Trailing punctuation/space | 100% |
+| trailer | Trailing material (alias) | 100% |
 | ln | Louw-Nida semantic domains | 97% |
+| bookshort | Book abbreviation (MAT) | 100% |
+| num | Word position in verse | 100% |
+| ref | Reference string (MAT 1:1!1) | 100% |
+| id | Unique word ID | 100% |
 
 ### Gloss Coverage
 
