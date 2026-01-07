@@ -204,27 +204,78 @@ THEN attach orphan to adjacent structure
      confidence = 0.6
 ```
 
-#### Rule 4: Generate Structure for TR-Only Segments (Stanza)
+#### Rule 4: Generate Structure for TR-Only Segments (N1904-Informed)
 
+**Priority 1: Strong's Number Lookup**
+```
+IF TR word has Strong's number
+AND Strong's number exists in N1904
+THEN:
+  1. Look up typical phrase type for this Strong's number
+  2. Group with adjacent words that share compatible Strong's patterns
+  confidence = 0.85-0.9
+  source = 'n1904_strong'
+```
+
+**Priority 2: POS Bigram Patterns**
 ```
 IF consecutive TR-only words exist
-AND no N1904 structure can be extended
 THEN:
-  1. Run Stanza dependency parse on the segment
-  2. Convert dependency tree to phrase structure:
-     - Group words by their syntactic head
-     - Assign phrase type based on head POS:
-       * subs/pron head → NP
-       * prep head → PP
-       * adjv head → AdjP
-       * advb head → AdvP
-       * verb head → clause
-  3. Set confidence based on parse quality
-     confidence = 0.5-0.7 (based on Stanza's scores)
-     source = 'stanza'
+  1. Check POS bigrams against N1904 patterns:
+     - prep + art  → PP (94% confidence in N1904)
+     - prep + pron → PP (94%)
+     - prep + subs → PP (94%)
+     - art + subs  → NP (66%)
+     - subs + adjv → NP (78%)
+  2. Group words matching these patterns
+  confidence = 0.75-0.85
+  source = 'n1904_pattern'
 ```
 
+**Priority 3: Stanza Fallback**
+```
+IF no N1904 pattern matches
+THEN:
+  1. Run Stanza dependency parse on the segment
+  2. Convert dependency tree to phrase structure
+  3. Validate against N1904 patterns where possible
+  confidence = 0.5-0.7
+  source = 'stanza'
+```
+
+### N1904 Lookup Tables to Build
+
+| Table | Size | Usage |
+|-------|------|-------|
+| Strong's → phrase type | 3,258 | Primary lookup for TR words |
+| POS bigram → phrase type | ~100 | Boundary detection |
+| POS sequence → phrase type | ~500 | Full phrase matching |
+| Lemma → typical role | ~5,000 | Role assignment |
+
 ### Implementation Steps
+
+#### Step 0: Build N1904 Lookup Tables
+
+```python
+def build_n1904_lookups():
+    """Pre-compute lookup tables from N1904 for TR generation."""
+
+    # 1. Strong's number → phrase type distribution
+    strong_to_phrase = {}  # {strong: {NP: 100, PP: 20, ...}}
+
+    # 2. POS bigram → phrase type
+    bigram_to_phrase = {}  # {(prep, art): {PP: 94%, NP: 6%}}
+
+    # 3. POS sequence → phrase type (for 2-5 word sequences)
+    sequence_to_phrase = {}  # {(art, subs, pron): NP}
+
+    # 4. Lemma → typical phrase position
+    lemma_to_role = {}  # {lemma: {head: 50%, dependent: 50%}}
+
+    # Save to data/intermediate/n1904_structure_lookups.json
+```
+
+Script: `scripts/phase4/p4_07_build_structure_lookups.py`
 
 #### Step 1: Analyze Each Verse
 
@@ -268,14 +319,16 @@ def handle_orphan_words(verse):
 
 #### Step 4: Assign Confidence Scores
 
-| Scenario | Confidence |
-|----------|------------|
-| Direct transplant (100% aligned) | 1.0 |
-| Extended with 1 gap word | 0.85 |
-| Extended with 2+ gap words | 0.7 |
-| Majority alignment (≥70%) | 0.7 |
-| Orphan attached to neighbor | 0.6 |
-| Generated minimal structure | 0.4 |
+| Scenario | Confidence | Source |
+|----------|------------|--------|
+| Direct transplant (100% aligned) | 1.0 | n1904 |
+| Extended with 1 gap word | 0.85 | extended |
+| Extended with 2+ gap words | 0.7 | extended |
+| Majority alignment (≥70%) | 0.7 | extended |
+| Strong's number lookup match | 0.85-0.9 | n1904_strong |
+| POS bigram pattern match | 0.75-0.85 | n1904_pattern |
+| Orphan attached to neighbor | 0.6 | heuristic |
+| Stanza-generated structure | 0.5-0.7 | stanza |
 
 ### Expected Output
 
